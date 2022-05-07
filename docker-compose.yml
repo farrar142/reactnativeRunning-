@@ -1,0 +1,35 @@
+version: "3.7"
+services:
+  kakao:
+    healthcheck:
+      test: ["CMD","curl","-f", "http://172.17.0.1:3002",]
+      interval: 1s
+      retries: 30
+      start_period: 60s
+    build: 
+      context: ./kakaomapfront
+      dockerfile : ./dockerfile
+    container_name: ${CONTAINER_NAME}
+    user: root
+    entrypoint: sh command.sh
+    volumes:
+      - ./kakaomapfront:/usr/src/app
+      - /usr/src/app/node_modules/
+    ports:
+      - ${PORT}:3000
+    restart: unless-stopped
+    # cpus: .10
+    # mem_limit: "512M"
+
+  django:
+    build: 
+      context: ./backend
+      dockerfile : ./dockerfile
+    command: "sh command.sh ${BACKPORT}"
+    container_name: ${BACKCONTAINER_NAME}
+    hostname: root
+    volumes:
+      - ./backend:/usr/src/app
+    ports:
+      - "${BACKPORT}:8000"
+    restart: unless-stopped
